@@ -1,0 +1,8 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+
+.vs/
+Properties/
+GiveGold.csproj.user
