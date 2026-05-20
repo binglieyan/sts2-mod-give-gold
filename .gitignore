@@ -4,5 +4,6 @@
 
 
 .vs/
+.claude/
 Properties/
 GiveGold.csproj.user
