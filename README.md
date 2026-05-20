@@ -24,15 +24,13 @@ A Slay the Spire 2 co-op mod that lets you give gold to teammates. Click the gol
 
 ## 安装 / Installation
 
-1. 安装 BepInEx（Slay the Spire 2 模组加载器）
-2. 将 `GiveGold.dll` 和 `GiveGold.pck` 放入 `Slay the Spire 2/mods/` 目录
-3. 启动游戏即可
+1. 下载`GiftGold.zip`，解压到 Slay the Spire 2 的 `mods` 目录
+2. 启动游戏即可
 
 ---
 
-1. Install BepInEx (Slay the Spire 2 mod loader)
-2. Place `GiveGold.dll` and `GiveGold.pck` into `Slay the Spire 2/mods/`
-3. Launch the game
+1. Download `GiftGold.zip` and extract it to the `mods` directory of Slay the Spire 2.
+2. Launch the game
 
 ## 使用方式 / Usage
 
