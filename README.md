@@ -24,12 +24,12 @@ A Slay the Spire 2 co-op mod that lets you give gold to teammates. Click the gol
 
 ## 安装 / Installation
 
-1. 下载`GiftGold.zip`，解压到 Slay the Spire 2 的 `mods` 目录
+1. 下载`GiveGold.zip`，解压到 Slay the Spire 2 的 `mods` 目录
 2. 启动游戏即可
 
 ---
 
-1. Download `GiftGold.zip` and extract it to the `mods` directory of Slay the Spire 2.
+1. Download `GiveGold.zip` and extract it to the `mods` directory of Slay the Spire 2.
 2. Launch the game
 
 ## 使用方式 / Usage
@@ -78,4 +78,5 @@ Configure `$(Sts2Path)` and `$(GodotPath)` in `GiveGold.csproj` before building.
 ## 致谢 / Credits
 
 - 作者 / Author: binglieyan
-- 版本 / Version: v1.0.0
+- 版本 / Version: v1.1.0
+- 灵感来源 / Inspired by: https://github.com/blz111/giftgold-sts2-mod

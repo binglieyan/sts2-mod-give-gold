@@ -38,23 +38,28 @@ internal static class GiveGoldExecutor
             Amount = amount
         };
 
+        string? error = await ApplyGiveAsync(sender, target, amount);
+        if (error != null)
+            return new GiveGoldTypes.GiveResult(false, error);
+
+        INetGameService? netService = RunManager.Instance.NetService;
+        if (netService == null)
+        {
+            await RollbackGoldAsync(sender, amount);
+            return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:sendFailed"));
+        }
+
         try
         {
-            string? error = await ApplyGiveAsync(sender, target, amount);
-            if (error != null)
-                return new GiveGoldTypes.GiveResult(false, error);
-
-            INetGameService? netService = RunManager.Instance.NetService;
-            if (netService == null)
-                return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:sendFailed"));
-
-            netService.SendMessage(outgoingMessage);
             GiveGoldRequestDedup.TryAdd(requestId);
+            netService.SendMessage(outgoingMessage);
             return new GiveGoldTypes.GiveResult(true, GiveGoldLoc.Get("panel:giveSuccess", targetName, amount));
         }
         catch (Exception ex)
         {
-            GiveGoldInitializer.Logger.Error($"Failed to send gold: {ex}");
+            GiveGoldInitializer.Logger.Error($"Failed to send gold, rolling back: {ex}");
+            try { await RollbackGoldAsync(sender, amount); }
+            catch (Exception rollbackEx) { GiveGoldInitializer.Logger.Error($"Rollback also failed: {rollbackEx}"); }
             return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:sendFailed"));
         }
     }
@@ -70,6 +75,11 @@ internal static class GiveGoldExecutor
 
         await PlayerCmd.LoseGold(amount, sender, GoldLossType.Spent);
         return null;
+    }
+
+    private static async Task RollbackGoldAsync(Player sender, int amount)
+    {
+        await PlayerCmd.GainGold(amount, sender, wasStolenBack: false);
     }
 
     public static async Task<string?> ApplyIncomingGiveAsync(Player target, int amount)
