@@ -24,10 +24,11 @@ Network/
   Messages/
 	GiveGoldRequestMessage.cs → Custom INetMessage (broadcast, reliable, PacketWriter/Reader)
 Ui/
+  GameTheme.cs            → Game-native theme (StsColors, fonts, sounds, animations)
   GiveGoldPanel.cs        → Godot Control panel (target picker, amount input, send/close)
 Integration/
   GiveGoldBootstrapPatch.cs → Harmony patches hooking NGame._Ready, NRun._Ready,
-							   NTopBarGold click, RunManager.CleanUp
+							   NClickableControl._GuiInput (NTopBarGold click), RunManager.CleanUp
 ```
 
 ## Key Mod Behaviors
@@ -36,7 +37,7 @@ Integration/
 - **Lifecycle**: `NGame._Ready` → global init; `NRun._Ready` → attach network handler; `RunManager.CleanUp` → detach+cleanup
 - **UI trigger**: Click the gold display in the top bar → toggle the GiveGold panel
 - **Constraints**: Panel only opens when in a multiplayer run, not in combat, with at least one connected teammate
-- **Network**: Gold transfer messages are broadcast (reliable), deduplicated by request ID, and applied on both sender and receiver sides
+- **Network**: Gold is deducted locally first, then a reliable broadcast message is sent. If sending fails, the deduction is rolled back. Messages are deduplicated by request ID and applied on both sender and receiver sides
 
 ## Build Output
 
@@ -52,3 +53,4 @@ Integration/
 - Async network operations use `TaskHelper.RunSafely()` for fire-and-forget
 - All user-facing strings go through `GiveGoldLoc.Get(key, args...)`
 - Godot UI built entirely in code (no `.tscn` scenes)
+- UI styling via `GameTheme` static helpers (`MakeLabel`, `MakeButton`, `MakePanelStyle`, etc.); panels call `ApplyFontRecursive(this)` for CJK font coverage

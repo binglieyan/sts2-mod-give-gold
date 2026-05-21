@@ -19,6 +19,7 @@ public partial class GiveGoldPanel : Control
     private Label _goldLabel = null!;
     private Label _statusLabel = null!;
     private Button _sendButton = null!;
+    private bool _sending;
 
     public override void _Ready()
     {
@@ -26,123 +27,62 @@ public partial class GiveGoldPanel : Control
         MouseFilter = MouseFilterEnum.Stop;
         Visible = false;
 
-        ColorRect backdrop = new()
+        // Backdrop
+        var backdrop = new ColorRect
         {
-            Color = new Color(0f, 0f, 0f, 0.55f)
+            Color = GameTheme.Backdrop
         };
         backdrop.SetAnchorsPreset(LayoutPreset.FullRect);
         AddChild(backdrop);
 
-        CenterContainer centerContainer = new();
+        var centerContainer = new CenterContainer();
         centerContainer.SetAnchorsPreset(LayoutPreset.FullRect);
         AddChild(centerContainer);
 
-        StyleBoxFlat panelStyle = new()
-        {
-            BgColor = new Color(0.12f, 0.12f, 0.14f, 0.95f),
-            BorderWidthLeft = 1,
-            BorderWidthRight = 1,
-            BorderWidthTop = 1,
-            BorderWidthBottom = 1,
-            BorderColor = new Color(0.35f, 0.35f, 0.4f, 0.6f),
-            CornerRadiusTopLeft = 12,
-            CornerRadiusTopRight = 12,
-            CornerRadiusBottomLeft = 12,
-            CornerRadiusBottomRight = 12,
-            ContentMarginLeft = 20,
-            ContentMarginRight = 20,
-            ContentMarginTop = 20,
-            ContentMarginBottom = 20
-        };
-
-        PanelContainer panelContainer = new()
+        var panelContainer = new PanelContainer
         {
             CustomMinimumSize = new Vector2(520f, 320f)
         };
-        panelContainer.AddThemeStyleboxOverride("panel", panelStyle);
+        panelContainer.AddThemeStyleboxOverride("panel",
+            GameTheme.MakePanelStyle(borderWidth: 1, padding: 20, cornerRadius: 12));
         centerContainer.AddChild(panelContainer);
 
-        VBoxContainer layout = new();
+        var layout = new VBoxContainer();
         layout.AddThemeConstantOverride("separation", 12);
         panelContainer.AddChild(layout);
 
-        Label titleLabel = new()
-        {
-            Text = GiveGoldLoc.Get("panel:title"),
-            HorizontalAlignment = HorizontalAlignment.Center
-        };
-        layout.AddChild(titleLabel);
+        // Title
+        layout.AddChild(GameTheme.MakeLabel(
+            GiveGoldLoc.Get("panel:title"), 24, GameTheme.Gold,
+            HorizontalAlignment.Center));
 
-        _goldLabel = new Label();
+        // Gold display
+        _goldLabel = GameTheme.MakeLabel("", 18, GameTheme.Cream);
         layout.AddChild(_goldLabel);
 
-        Label targetLabel = new()
-        {
-            Text = GiveGoldLoc.Get("panel:select")
-        };
-        layout.AddChild(targetLabel);
+        // Target picker
+        layout.AddChild(GameTheme.MakeLabel(
+            GiveGoldLoc.Get("panel:select"), 16, GameTheme.LightGray));
 
         _targetPicker = new OptionButton();
-        _targetPicker.AddThemeStyleboxOverride("normal", new StyleBoxFlat
-        {
-            BgColor = new Color(0.08f, 0.08f, 0.1f, 0.9f),
-            BorderWidthLeft = 1,
-            BorderWidthRight = 1,
-            BorderWidthTop = 1,
-            BorderWidthBottom = 1,
-            BorderColor = new Color(0.35f, 0.35f, 0.4f, 0.5f),
-            CornerRadiusTopLeft = 6,
-            CornerRadiusTopRight = 6,
-            CornerRadiusBottomLeft = 6,
-            CornerRadiusBottomRight = 6,
-            ContentMarginLeft = 8,
-            ContentMarginRight = 8
-        });
+        _targetPicker.AddThemeStyleboxOverride("normal", GameTheme.MakeInputStyle());
+        _targetPicker.AddThemeStyleboxOverride("focus", GameTheme.MakeInputFocusStyle());
         layout.AddChild(_targetPicker);
 
-        Label amountLabel = new()
-        {
-            Text = GiveGoldLoc.Get("panel:amount")
-        };
-        layout.AddChild(amountLabel);
+        // Amount input
+        layout.AddChild(GameTheme.MakeLabel(
+            GiveGoldLoc.Get("panel:amount"), 16, GameTheme.LightGray));
 
         _amountInput = new LineEdit
         {
             PlaceholderText = GiveGoldLoc.Get("panel:placeholder")
         };
-        _amountInput.AddThemeStyleboxOverride("normal", new StyleBoxFlat
-        {
-            BgColor = new Color(0.08f, 0.08f, 0.1f, 0.9f),
-            BorderWidthLeft = 1,
-            BorderWidthRight = 1,
-            BorderWidthTop = 1,
-            BorderWidthBottom = 1,
-            BorderColor = new Color(0.35f, 0.35f, 0.4f, 0.5f),
-            CornerRadiusTopLeft = 6,
-            CornerRadiusTopRight = 6,
-            CornerRadiusBottomLeft = 6,
-            CornerRadiusBottomRight = 6,
-            ContentMarginLeft = 8,
-            ContentMarginRight = 8
-        });
-        _amountInput.AddThemeStyleboxOverride("focus", new StyleBoxFlat
-        {
-            BgColor = new Color(0.1f, 0.1f, 0.12f, 0.95f),
-            BorderWidthLeft = 1,
-            BorderWidthRight = 1,
-            BorderWidthTop = 1,
-            BorderWidthBottom = 1,
-            BorderColor = new Color(0.5f, 0.7f, 0.9f, 0.7f),
-            CornerRadiusTopLeft = 6,
-            CornerRadiusTopRight = 6,
-            CornerRadiusBottomLeft = 6,
-            CornerRadiusBottomRight = 6,
-            ContentMarginLeft = 8,
-            ContentMarginRight = 8
-        });
+        _amountInput.AddThemeStyleboxOverride("normal", GameTheme.MakeInputStyle());
+        _amountInput.AddThemeStyleboxOverride("focus", GameTheme.MakeInputFocusStyle());
         _amountInput.TextSubmitted += _ => OnSendPressed();
         layout.AddChild(_amountInput);
 
+        // Status
         _statusLabel = new Label
         {
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
@@ -150,53 +90,26 @@ public partial class GiveGoldPanel : Control
         };
         layout.AddChild(_statusLabel);
 
-        HBoxContainer buttonRow = new()
+        // Button row
+        var buttonRow = new HBoxContainer
         {
             Alignment = BoxContainer.AlignmentMode.End
         };
         buttonRow.AddThemeConstantOverride("separation", 8);
         layout.AddChild(buttonRow);
 
-        Button closeButton = new()
-        {
-            Text = GiveGoldLoc.Get("panel:close")
-        };
-        closeButton.AddThemeStyleboxOverride("normal", MakeButtonStyle(new Color(0.22f, 0.22f, 0.25f, 0.9f)));
-        closeButton.AddThemeStyleboxOverride("hover", MakeButtonStyle(new Color(0.28f, 0.28f, 0.32f, 0.95f)));
-        closeButton.AddThemeStyleboxOverride("pressed", MakeButtonStyle(new Color(0.16f, 0.16f, 0.18f, 0.95f)));
+        var closeButton = GameTheme.MakeButton(
+            GiveGoldLoc.Get("panel:close"), fontSize: 16, fontColor: GameTheme.LightGray);
         closeButton.Pressed += HidePanel;
         buttonRow.AddChild(closeButton);
 
-        StyleBoxFlat sendNormal = MakeButtonStyle(new Color(0.25f, 0.55f, 0.85f, 0.85f));
-        StyleBoxFlat sendHover = MakeButtonStyle(new Color(0.3f, 0.62f, 0.92f, 0.9f));
-        StyleBoxFlat sendPressed = MakeButtonStyle(new Color(0.18f, 0.42f, 0.68f, 0.9f));
-
-        _sendButton = new Button
-        {
-            Text = GiveGoldLoc.Get("panel:send")
-        };
-        _sendButton.AddThemeColorOverride("font_color", Colors.White);
-        _sendButton.AddThemeStyleboxOverride("normal", sendNormal);
-        _sendButton.AddThemeStyleboxOverride("hover", sendHover);
-        _sendButton.AddThemeStyleboxOverride("pressed", sendPressed);
+        // Send button — gold-accented primary action
+        _sendButton = GameTheme.MakeButton(
+            GiveGoldLoc.Get("panel:send"), fontSize: 16, fontColor: GameTheme.Gold);
         _sendButton.Pressed += OnSendPressed;
         buttonRow.AddChild(_sendButton);
-    }
 
-    private static StyleBoxFlat MakeButtonStyle(Color bgColor)
-    {
-        return new StyleBoxFlat
-        {
-            BgColor = bgColor,
-            CornerRadiusTopLeft = 6,
-            CornerRadiusTopRight = 6,
-            CornerRadiusBottomLeft = 6,
-            CornerRadiusBottomRight = 6,
-            ContentMarginLeft = 14,
-            ContentMarginRight = 14,
-            ContentMarginTop = 6,
-            ContentMarginBottom = 6
-        };
+        GameTheme.ApplyFontRecursive(this);
     }
 
     public void ShowPanel()
@@ -216,11 +129,15 @@ public partial class GiveGoldPanel : Control
 
     public void RefreshFromService()
     {
+        if (!GodotObject.IsInstanceValid(this)) return;
+
         IReadOnlyList<GiveGoldTypes.GiveTarget> targets = GiveGoldService.GetAvailableTargets();
         _goldLabel.Text = GiveGoldLoc.Get("panel:gold", GiveGoldService.GetLocalPlayerGold());
 
         bool hasTargets = targets.Count > 0;
-        _sendButton.Disabled = !hasTargets;
+        bool shouldDisable = !hasTargets || _sending;
+        if (_sendButton.Disabled != shouldDisable)
+            _sendButton.Disabled = shouldDisable;
 
         if (TargetsEqual(_targets, targets))
             return;
@@ -234,11 +151,13 @@ public partial class GiveGoldPanel : Control
 
         _targetPicker.Disabled = !hasTargets;
         if (!hasTargets)
-            SetStatus(GiveGoldLoc.Get("panel:noTargets"), Colors.OrangeRed);
+            SetStatus(GiveGoldLoc.Get("panel:noTargets"), GameTheme.Red);
     }
 
     public void SetStatus(string message, Color color)
     {
+        if (!GodotObject.IsInstanceValid(this)) return;
+
         _statusLabel.Text = message;
         _statusLabel.Modulate = color;
     }
@@ -257,13 +176,13 @@ public partial class GiveGoldPanel : Control
     {
         if (_targets.Count == 0)
         {
-            SetStatus(GiveGoldLoc.Get("panel:noTargets"), Colors.OrangeRed);
+            SetStatus(GiveGoldLoc.Get("panel:noTargets"), GameTheme.Red);
             return;
         }
 
         if (!int.TryParse(_amountInput.Text, out int amount) || amount <= 0)
         {
-            SetStatus(GiveGoldLoc.Get("panel:invalidAmount"), Colors.OrangeRed);
+            SetStatus(GiveGoldLoc.Get("panel:invalidAmount"), GameTheme.Red);
             return;
         }
 
@@ -271,16 +190,16 @@ public partial class GiveGoldPanel : Control
         if (myGold < amount)
         {
             if (myGold == 0)
-                SetStatus(GiveGoldLoc.Get("error:noGold"), Colors.OrangeRed);
+                SetStatus(GiveGoldLoc.Get("error:noGold"), GameTheme.Red);
             else
-                SetStatus(GiveGoldLoc.Get("error:insufficientGold", myGold, amount), Colors.OrangeRed);
+                SetStatus(GiveGoldLoc.Get("error:insufficientGold", myGold, amount), GameTheme.Red);
             return;
         }
 
         int selectedIndex = _targetPicker.Selected;
         if (selectedIndex < 0 || selectedIndex >= _targets.Count)
         {
-            SetStatus(GiveGoldLoc.Get("panel:selectTarget"), Colors.OrangeRed);
+            SetStatus(GiveGoldLoc.Get("panel:selectTarget"), GameTheme.Red);
             return;
         }
 
@@ -288,19 +207,21 @@ public partial class GiveGoldPanel : Control
 
         if (!GiveGoldService.GetAvailableTargets().Any(t => t.NetId == targetNetId))
         {
-            SetStatus(GiveGoldLoc.Get("panel:noTargets"), Colors.OrangeRed);
+            SetStatus(GiveGoldLoc.Get("panel:noTargets"), GameTheme.Red);
             RefreshFromService();
             return;
         }
 
-        _sendButton.Disabled = true;
+        if (_sending) return;
+        _sending = true;
         try
         {
             GiveGoldTypes.GiveResult result = await GiveGoldService.TrySendGoldAsync(targetNetId, amount);
-            SetStatus(result.Message, result.Success ? Colors.LightGreen : Colors.OrangeRed);
+            SetStatus(result.Message, result.Success ? GameTheme.Green : GameTheme.Red);
         }
         finally
         {
+            _sending = false;
             RefreshFromService();
         }
     }
