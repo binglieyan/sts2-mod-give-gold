@@ -32,11 +32,8 @@ internal static class GiveGoldNetworkHandler
 
     public static void DetachFromRun()
     {
-        if (_attachedNetService != null)
-        {
-            _attachedNetService.UnregisterMessageHandler<GiveGoldRequestMessage>(HandleMessage);
-            _attachedNetService = null;
-        }
+        _attachedNetService?.UnregisterMessageHandler<GiveGoldRequestMessage>(HandleMessage);
+        _attachedNetService = null;
         GiveGoldRequestDedup.Clear();
     }
 

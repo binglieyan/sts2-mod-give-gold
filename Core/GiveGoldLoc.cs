@@ -59,7 +59,7 @@ public static class GiveGoldLoc
         ["error:noGold"] = "You have no gold to send.",
     };
 
-    private static readonly Dictionary<string, string> _strings = new();
+    private static readonly Dictionary<string, string> _strings = [];
     private static bool _isInitialized;
 
     public static void Initialize()

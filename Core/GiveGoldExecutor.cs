@@ -64,7 +64,7 @@ internal static class GiveGoldExecutor
         }
     }
 
-    public static async Task<string?> ApplyGiveAsync(Player sender, Player target, int amount)
+    public static async Task<string?> ApplyGiveAsync(Player sender, Player _, int amount)
     {
         if (sender.Gold < amount)
         {

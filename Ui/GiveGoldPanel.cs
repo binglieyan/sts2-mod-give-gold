@@ -1,6 +1,5 @@
 #nullable enable
 
-using GiveGold;
 using GiveGold.Core;
 using Godot;
 using MegaCrit.Sts2.Core.Helpers;

@@ -1,21 +1,20 @@
 <Project Sdk="Godot.NET.Sdk/4.6.2">
-  <PropertyGroup>
-	<TargetFramework>net10.0</TargetFramework>
-	<EnableDynamicLoading>true</EnableDynamicLoading>
-	<PlatformTarget>x64</PlatformTarget>
-	<GodotPath>"D:\Godot_v4.6.2-stable_mono_win64\Godot_v4.6.2-stable_mono_win64_console.exe"</GodotPath>
-	<Sts2Path>E:\SteamLibrary\steamapps\common\Slay the Spire 2</Sts2Path>
-		  <!-- Disable C# source generators to avoid type conflicts with referenced assemblies -->
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
+		<PlatformTarget>x64</PlatformTarget>
+		<GodotPath>"D:\Godot_v4.6.2-stable_mono_win64\Godot_v4.6.2-stable_mono_win64_console.exe"</GodotPath>
+		<Sts2Path>E:\SteamLibrary\steamapps\common\Slay the Spire 2</Sts2Path>
+		<!-- Disable C# source generators to avoid type conflicts with referenced assemblies -->
 		<EnableSourceGenerators>false</EnableSourceGenerators>
-  </PropertyGroup>
+	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Alchyr.Sts2.ModAnalyzers" Version="0.1.9" />
-	  <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
-		<PrivateAssets>all</PrivateAssets>
-		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-
+		<PackageReference Include="Alchyr.Sts2.ModAnalyzers" Version="0.1.9" />
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -29,11 +28,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Core\" />
-	  <Folder Include="Network\Messages\" />
-	<Folder Include="Network\" />
-	  <Folder Include="Ui\" />
-	  <Folder Include="Integration\" />
+		<Folder Include="Core\" />
+		<Folder Include="Network\Messages\" />
+		<Folder Include="Network\" />
+		<Folder Include="Ui\" />
+		<Folder Include="Integration\" />
 	</ItemGroup>
 
 	<Target Name="EnsureModsDirectory" BeforeTargets="PostBuildEvent">
@@ -47,6 +46,6 @@
 
 	<Target Name="GodotPublish" AfterTargets="Publish">
 		<Message Text="Exporting Godot .pck to mods folder..." Importance="high" />
-		<Exec Command="start &quot;Godot Export&quot; /wait $(GodotPath) --headless --export-pack &quot;Windows Desktop&quot; &quot;$(Sts2Path)\mods\$(MSBuildProjectName).pck&quot;" ContinueOnError="WarnAndContinue"/>
+		<Exec Command="start &quot;Godot Export&quot; /wait $(GodotPath) --headless --export-pack &quot;Windows Desktop&quot; &quot;$(Sts2Path)\mods\$(MSBuildProjectName).pck&quot;" ContinueOnError="WarnAndContinue" />
 	</Target>
 </Project>

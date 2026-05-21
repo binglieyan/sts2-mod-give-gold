@@ -22,12 +22,12 @@ Core/
 Network/
   GiveGoldNetworkHandler.cs   → Registers/deregisters network message handler
   Messages/
-    GiveGoldRequestMessage.cs → Custom INetMessage (broadcast, reliable, PacketWriter/Reader)
+	GiveGoldRequestMessage.cs → Custom INetMessage (broadcast, reliable, PacketWriter/Reader)
 Ui/
   GiveGoldPanel.cs        → Godot Control panel (target picker, amount input, send/close)
 Integration/
   GiveGoldBootstrapPatch.cs → Harmony patches hooking NGame._Ready, NRun._Ready,
-                               NTopBarGold click, RunManager.CleanUp
+							   NTopBarGold click, RunManager.CleanUp
 ```
 
 ## Key Mod Behaviors

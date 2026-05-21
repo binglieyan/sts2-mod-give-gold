@@ -70,7 +70,7 @@ internal static class GiveGoldValidator
     {
         RunState? runState = RunManager.Instance?.DebugOnlyGetState();
         if (runState == null)
-            return Array.Empty<GiveGoldTypes.GiveTarget>();
+            return [];
 
         IReadOnlyCollection<ulong>? connectedIds = RunManager.Instance!.RunLobby?.ConnectedPlayerIds;
         List<GiveGoldTypes.GiveTarget> targets = [];
