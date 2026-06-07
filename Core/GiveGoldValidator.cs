@@ -50,7 +50,7 @@ internal static class GiveGoldValidator
         RunState? runState = RunManager.Instance?.DebugOnlyGetState();
         if (runState == null || NRun.Instance?.GlobalUi == null)
             return CommonState.NotInRun;
-        if (RunManager.Instance!.IsSinglePlayerOrFakeMultiplayer || runState.Players.Count <= 1)
+        if (RunManager.Instance!.IsSingleplayerOrFakeMultiplayer || runState.Players.Count <= 1)
             return CommonState.NotMultiplayer;
         if (CombatManager.Instance.IsInProgress)
             return CommonState.InCombat;
