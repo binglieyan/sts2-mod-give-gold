@@ -3,19 +3,21 @@
 using GiveGold.Network.Messages;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Context;
-using MegaCrit.Sts2.Core.Entities.Gold;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Runs;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GiveGold.Core;
 
 internal static class GiveGoldExecutor
 {
-    public static async Task<GiveGoldTypes.GiveResult> TrySendGoldAsync(ulong targetPlayerId, int amount)
+    private const string GoldSmallSfx = "event:/sfx/ui/gold/gold_1";
+    private const string GoldMediumSfx = "event:/sfx/ui/gold/gold_2";
+    private const string GoldLargeSfx = "event:/sfx/ui/gold/gold_3";
+
+    public static GiveGoldTypes.GiveResult TrySendGold(ulong targetPlayerId, int amount)
     {
         if (GiveGoldValidator.CheckCommonState() != GiveGoldValidator.CommonState.Ok)
             return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:giveFailed"));
@@ -38,14 +40,14 @@ internal static class GiveGoldExecutor
             Amount = amount
         };
 
-        string? error = await ApplyGiveAsync(sender, target, amount);
+        string? error = ApplyGive(sender, target, amount);
         if (error != null)
             return new GiveGoldTypes.GiveResult(false, error);
 
         INetGameService? netService = RunManager.Instance.NetService;
         if (netService == null)
         {
-            await RollbackGoldAsync(sender, amount);
+            RollbackGold(sender, amount);
             return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:sendFailed"));
         }
 
@@ -58,13 +60,13 @@ internal static class GiveGoldExecutor
         catch (Exception ex)
         {
             GiveGoldInitializer.Logger.Error($"Failed to send gold, rolling back: {ex}");
-            try { await RollbackGoldAsync(sender, amount); }
+            try { RollbackGold(sender, amount); }
             catch (Exception rollbackEx) { GiveGoldInitializer.Logger.Error($"Rollback also failed: {rollbackEx}"); }
             return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:sendFailed"));
         }
     }
 
-    public static async Task<string?> ApplyGiveAsync(Player sender, Player _, int amount)
+    public static string? ApplyGive(Player sender, Player _, int amount)
     {
         if (sender.Gold < amount)
         {
@@ -73,22 +75,29 @@ internal static class GiveGoldExecutor
             return GiveGoldLoc.Get("error:insufficientGold", sender.Gold, amount);
         }
 
-        await PlayerCmd.LoseGold(amount, sender, GoldLossType.Spent);
+        sender.Gold -= amount;
+        SfxCmd.Play(GoldSmallSfx);
         return null;
     }
 
-    private static async Task RollbackGoldAsync(Player sender, int amount)
+    private static void RollbackGold(Player sender, int amount)
     {
-        await PlayerCmd.GainGold(amount, sender, wasStolenBack: false);
+        sender.Gold += amount;
     }
 
-    public static async Task<string?> ApplyIncomingGiveAsync(Player target, int amount)
+    public static string? ApplyIncomingGive(Player target, int amount)
     {
         if (amount <= 0)
             return GiveGoldLoc.Get("error:amountNotPositive");
-        await PlayerCmd.GainGold(amount, target, wasStolenBack: false);
+        target.Gold += amount;
+        SfxCmd.Play(PickGoldGainSfx(amount));
         return null;
     }
+
+    private static string PickGoldGainSfx(int amount) =>
+        amount >= 100 ? GoldLargeSfx :
+        amount > 30 ? GoldMediumSfx :
+        GoldSmallSfx;
 
     public sealed class ProcessResult
     {
@@ -96,7 +105,7 @@ internal static class GiveGoldExecutor
         public string? StatusMessage { get; init; }
     }
 
-    public static async Task<ProcessResult> ProcessIncomingGiveAsync(GiveGoldRequestMessage message, ulong senderId)
+    public static ProcessResult ProcessIncomingGive(GiveGoldRequestMessage message, ulong senderId)
     {
         RunState? runState = RunManager.Instance?.DebugOnlyGetState();
         if (runState == null)
@@ -120,7 +129,7 @@ internal static class GiveGoldExecutor
         {
             if (LocalContext.IsMe(target))
             {
-                string? error = await ApplyIncomingGiveAsync(target, message.Amount);
+                string? error = ApplyIncomingGive(target, message.Amount);
                 if (error != null)
                 {
                     GiveGoldInitializer.Logger.Error($"Failed to apply incoming gold: {error}");

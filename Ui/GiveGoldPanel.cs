@@ -2,11 +2,9 @@
 
 using GiveGold.Core;
 using Godot;
-using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GiveGold.Ui;
 
@@ -169,10 +167,10 @@ public partial class GiveGoldPanel : Control
 
     private void OnSendPressed()
     {
-        TaskHelper.RunSafely(SendGoldAsync());
+        SendGold();
     }
 
-    private async Task SendGoldAsync()
+    private void SendGold()
     {
         if (_targets.Count == 0)
         {
@@ -216,7 +214,7 @@ public partial class GiveGoldPanel : Control
         _sending = true;
         try
         {
-            GiveGoldTypes.GiveResult result = await GiveGoldService.TrySendGoldAsync(targetNetId, amount);
+            GiveGoldTypes.GiveResult result = GiveGoldService.TrySendGold(targetNetId, amount);
             SetStatus(result.Message, result.Success ? GameTheme.Green : GameTheme.Red);
         }
         finally

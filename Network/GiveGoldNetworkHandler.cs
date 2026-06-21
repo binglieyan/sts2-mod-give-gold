@@ -3,11 +3,9 @@
 using GiveGold.Core;
 using GiveGold.Network.Messages;
 using MegaCrit.Sts2.Core.Context;
-using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Runs;
 using System;
-using System.Threading.Tasks;
 
 namespace GiveGold.Network;
 
@@ -45,12 +43,7 @@ internal static class GiveGoldNetworkHandler
         if (LocalContext.NetId.HasValue && senderId == LocalContext.NetId.Value)
             return;
 
-        TaskHelper.RunSafely(ProcessAsync(message, senderId));
-    }
-
-    private static async Task ProcessAsync(GiveGoldRequestMessage message, ulong senderId)
-    {
-        GiveGoldExecutor.ProcessResult processResult = await GiveGoldExecutor.ProcessIncomingGiveAsync(message, senderId);
+        GiveGoldExecutor.ProcessResult processResult = GiveGoldExecutor.ProcessIncomingGive(message, senderId);
         if (processResult.ShouldRefresh)
             PanelRefreshRequested?.Invoke(processResult.StatusMessage);
     }

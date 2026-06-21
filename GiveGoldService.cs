@@ -7,7 +7,6 @@ using Godot;
 using MegaCrit.sts2.Core.Nodes.TopBar;
 using MegaCrit.Sts2.Core.Nodes;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GiveGold;
 
@@ -56,8 +55,8 @@ public static class GiveGoldService
     public static int GetLocalPlayerGold() =>
         GiveGoldValidator.GetLocalPlayerGold();
 
-    public static Task<GiveGoldTypes.GiveResult> TrySendGoldAsync(ulong targetPlayerId, int amount) =>
-        GiveGoldExecutor.TrySendGoldAsync(targetPlayerId, amount);
+    public static GiveGoldTypes.GiveResult TrySendGold(ulong targetPlayerId, int amount) =>
+        GiveGoldExecutor.TrySendGold(targetPlayerId, amount);
 
     // ── UI orchestration ──────────────────────────────────
 
