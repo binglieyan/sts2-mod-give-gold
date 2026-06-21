@@ -78,5 +78,4 @@ Configure `$(Sts2Path)` and `$(GodotPath)` in `GiveGold.csproj` before building.
 ## 致谢 / Credits
 
 - 作者 / Author: binglieyan
-- 版本 / Version: v1.2.0
 - 灵感来源 / Inspired by: https://github.com/blz111/giftgold-sts2-mod
