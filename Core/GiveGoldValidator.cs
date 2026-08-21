@@ -57,12 +57,21 @@ internal static class GiveGoldValidator
         return CommonState.Ok;
     }
 
+    /// <summary>当前联机房间内已连接玩家的 NetId 集合（含本地玩家）；读取失败返回 null。</summary>
+    /// <remarks>
+    /// 版本兼容的唯一收口点：所有调用方都走这里取数。
+    /// 正式版合入新 API 后删除 Core/Sts2ApiCompat.cs，并把方法体改为：
+    /// <code>return RunManager.Instance?.RunLobby?.PlayerIds;</code>
+    /// </remarks>
+    internal static IEnumerable<ulong>? GetConnectedPlayerIds() =>
+        Sts2ApiCompat.GetConnectedPlayerIds(RunManager.Instance);
+
     public static bool HasAvailableTargets()
     {
         RunState? runState = RunManager.Instance?.DebugOnlyGetState();
         if (runState == null)
             return false;
-        IReadOnlyCollection<ulong>? connectedIds = RunManager.Instance!.RunLobby?.ConnectedPlayerIds;
+        IEnumerable<ulong>? connectedIds = GetConnectedPlayerIds();
         return runState.Players.Any(p => IsValidTarget(p, connectedIds));
     }
 
@@ -72,7 +81,7 @@ internal static class GiveGoldValidator
         if (runState == null)
             return [];
 
-        IReadOnlyCollection<ulong>? connectedIds = RunManager.Instance!.RunLobby?.ConnectedPlayerIds;
+        IEnumerable<ulong>? connectedIds = GetConnectedPlayerIds();
         List<GiveGoldTypes.GiveTarget> targets = [];
         foreach (Player player in runState.Players)
         {
@@ -88,14 +97,14 @@ internal static class GiveGoldValidator
         return me?.Gold ?? 0;
     }
 
-    public static bool IsValidTarget(Player player, IReadOnlyCollection<ulong>? connectedIds)
+    public static bool IsValidTarget(Player player, IEnumerable<ulong>? connectedIds)
     {
         return !LocalContext.IsMe(player) && IsPlayerConnected(player.NetId, connectedIds);
     }
 
-    public static bool IsPlayerConnected(ulong netId, IReadOnlyCollection<ulong>? connectedIds)
+    public static bool IsPlayerConnected(ulong netId, IEnumerable<ulong>? connectedIds)
     {
-        return connectedIds == null || connectedIds.Count == 0 || connectedIds.Contains(netId);
+        return connectedIds == null || !connectedIds.Any() || connectedIds.Contains(netId);
     }
 
     public static string GetPlayerDisplayName(Player player)

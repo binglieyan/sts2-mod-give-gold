@@ -3,7 +3,7 @@
 A mod for Slay the Spire 2 that lets players give gold to teammates in multiplayer runs via a clickable top-bar gold UI.
 
 ## Tech Stack
-- **Godot 4.6.2 Mono** (C#, .NET 10.0) — UI layer, exported as `.pck`
+- **Godot 4.7.2 Mono** (C#, .NET 10.0) — UI layer, exported as `.pck`
 - **Harmony** — runtime patching of STS2 game code
 - **BepInEx.AssemblyPublicizer** — access internal STS2 types
 - **Slay the Spire 2** — referenced assemblies at `$(Sts2Path)` (Steam install)
@@ -15,8 +15,11 @@ GiveGoldInitializer.cs    → Mod entry point ([ModInitializer], Harmony bootstr
 GiveGoldService.cs        → Public API facade (lifecycle, panel orchestration)
 Core/
   GiveGoldTypes.cs        → GiveTarget and GiveResult record structs
-  GiveGoldValidator.cs    → State checks (in-run, multiplayer, not-in-combat, targets)
+  GiveGoldValidator.cs    → State checks (in-run, multiplayer, not-in-combat, targets); owns the
+                           GetConnectedPlayerIds() compat seam
   GiveGoldExecutor.cs     → Gold transfer logic (send/receive, sync + SFX playback)
+  Sts2ApiCompat.cs        → Cross-version API shim (beta PlayerIds / stable ConnectedPlayerIds);
+                           deletable once the new API reaches stable
   GiveGoldRequestDedup.cs → Deduplication ring buffer (ConcurrentDictionary, max 1000)
   GiveGoldLoc.cs          → Localization (zh/en fallback strings)
 Network/
@@ -38,6 +41,12 @@ Integration/
 - **UI trigger**: Click the gold display in the top bar → toggle the GiveGold panel
 - **Constraints**: Panel only opens when in a multiplayer run, not in combat, with at least one connected teammate
 - **Network**: Gold is directly modified on `Player.Gold` (sync, no async). A reliable broadcast message is sent after local deduction. If sending fails, the deduction is rolled back. Messages are deduplicated by request ID and applied on both sender and receiver sides. Incoming gold plays tiered SFX via `SfxCmd.Play()` based on amount thresholds
+
+## Beta API Compatibility
+
+- The beta build moved `RunLobby` to `MegaCrit.Sts2.Core.Multiplayer.Game.Lobby` and renamed `ConnectedPlayerIds` → `PlayerIds` (stable still has the old field/namespace)
+- `GiveGoldValidator.GetConnectedPlayerIds()` is the single seam all callers read connected player ids through; it delegates to `Core/Sts2ApiCompat.cs` (reflection, new-first/old-fallback)
+- **When the new API reaches stable**: delete `Core/Sts2ApiCompat.cs` and change the seam body to `return RunManager.Instance?.RunLobby?.PlayerIds;` — no other call sites change (full recipe in the compat file header)
 
 ## Build Output
 

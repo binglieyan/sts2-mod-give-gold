@@ -27,7 +27,7 @@ internal static class GiveGoldExecutor
         Player? target = runState?.Players.FirstOrDefault(player => player.NetId == targetPlayerId);
         if (sender == null || target == null)
             return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:giveFailed"));
-        if (!GiveGoldValidator.IsPlayerConnected(target.NetId, RunManager.Instance!.RunLobby?.ConnectedPlayerIds))
+        if (!GiveGoldValidator.IsPlayerConnected(target.NetId, GiveGoldValidator.GetConnectedPlayerIds()))
             return new GiveGoldTypes.GiveResult(false, GiveGoldLoc.Get("error:giveFailed"));
 
         string targetName = GiveGoldValidator.GetPlayerDisplayName(target);
