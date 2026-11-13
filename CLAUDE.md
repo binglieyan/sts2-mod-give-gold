@@ -53,7 +53,7 @@ Integration/
 
 - Post-build: DLL + `GiveGold.json` (mod manifest) auto-copied to `$(Sts2Path)\mods\`; the game only loads a local mod when its manifest sits next to the DLL
 - No `.pck` is produced anymore. The manifest is `"has_pck": false`, so `ModManager.TryLoadMod` skips the whole PCK branch; verified 2026-11-13 on v0.107.1 (stable) and v0.113.0 (beta) that the DLL loads and `GiveGoldPanel` instantiates with no `.pck` present. Distribution = `GiveGold.dll` + `GiveGold.json` only
-- If `res://` assets are ever added (scenes, textures, custom fonts): re-add a Godot pck export step, set `"has_pck": true`, and restore `$(GodotPath)` in the csproj
+- If `res://` assets are ever added (scenes, textures, custom fonts): uncomment `GodotPath`/`EnablePckExport` in the csproj (the `GodotPublish` target is kept but gated off), set `"has_pck": true`, and note that XML comments cannot wrap that target — its command contains the double-dash flags, which XML forbids inside comments
 - Requires `$(Sts2Path)` configured in `.csproj` or set as an env var
 
 ## Coding Conventions
