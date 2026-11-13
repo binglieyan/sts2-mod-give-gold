@@ -3,7 +3,6 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<EnableDynamicLoading>true</EnableDynamicLoading>
 		<PlatformTarget>x64</PlatformTarget>
-		<GodotPath>"D:\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64_console.exe"</GodotPath>
 		<Sts2Path>E:\SteamLibrary\steamapps\common\Slay the Spire 2</Sts2Path>
 		<!-- Godot 自动生成的入口类 Main 与被 publicize 的 sts2.dll 里的 Main 同名，CS0436 只影响生成的入口类，与本模组无关。
 		     真正关掉生成器的开关是 DisableImplicitGodotGeneratorReferences，但那会让 Godot 不再为 Control 子类生成脚本绑定，UI 面板可能无法实例化，故保持生成器开启。 -->
@@ -51,8 +50,7 @@
 		<Copy SourceFiles="$(MSBuildProjectDirectory)\GiveGold.json" DestinationFolder="$(Sts2Path)\mods\" SkipUnchangedFiles="true" />
 	</Target>
 
-	<Target Name="GodotPublish" AfterTargets="Publish">
-		<Message Text="Exporting Godot .pck to mods folder..." Importance="high" />
-		<Exec Command="start &quot;Godot Export&quot; /wait $(GodotPath) --headless --export-pack &quot;Windows Desktop&quot; &quot;$(Sts2Path)\mods\$(MSBuildProjectName).pck&quot;" ContinueOnError="WarnAndContinue" />
-	</Target>
+	<!-- 不再导出 .pck：清单是 "has_pck": false，ModManager.TryLoadMod 会整段跳过 PCK 分支，
+	     发布只需要 DLL + GiveGold.json。以后若要给模组加场景/图集/自定义字体等 res:// 资源，
+	     再加回 GodotPath 与一份导出的 PCK，并把 has_pck 改成 true。 -->
 </Project>

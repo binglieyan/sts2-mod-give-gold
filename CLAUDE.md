@@ -3,7 +3,7 @@
 A mod for Slay the Spire 2 that lets players give gold to teammates in multiplayer runs via a clickable top-bar gold UI.
 
 ## Tech Stack
-- **Godot 4.7.2 Mono** (C#, .NET 10.0) — UI layer, exported as `.pck`
+- **Godot 4.7.2 Mono** (C#, .NET 10.0) — UI layer built entirely in code (no `.pck`; the mod ships DLL + manifest)
 - **Harmony** — runtime patching of STS2 game code
 - **BepInEx.AssemblyPublicizer** — access internal STS2 types
 - **Slay the Spire 2** — referenced assemblies at `$(Sts2Path)` (Steam install)
@@ -52,9 +52,9 @@ Integration/
 ## Build Output
 
 - Post-build: DLL + `GiveGold.json` (mod manifest) auto-copied to `$(Sts2Path)\mods\`; the game only loads a local mod when its manifest sits next to the DLL
-- Post-publish: Godot `.pck` auto-exported to `$(Sts2Path)\mods\GiveGold.pck`
-- The `.pck` is **not mounted at runtime** (`"has_pck": false`; `ModManager.TryLoadMod` skips the whole PCK branch). Verified 2026-11-13 on v0.107.1 (stable) and v0.113.0 (beta): with no `.pck` present, the DLL still loads and `GiveGoldPanel` instantiates fine. Keep shipping it for forward compatibility, but don't rely on it for assets
-- Requires `$(Sts2Path)` and `$(GodotPath)` configured in `.csproj` or set as env vars
+- No `.pck` is produced anymore. The manifest is `"has_pck": false`, so `ModManager.TryLoadMod` skips the whole PCK branch; verified 2026-11-13 on v0.107.1 (stable) and v0.113.0 (beta) that the DLL loads and `GiveGoldPanel` instantiates with no `.pck` present. Distribution = `GiveGold.dll` + `GiveGold.json` only
+- If `res://` assets are ever added (scenes, textures, custom fonts): re-add a Godot pck export step, set `"has_pck": true`, and restore `$(GodotPath)` in the csproj
+- Requires `$(Sts2Path)` configured in `.csproj` or set as an env var
 
 ## Coding Conventions
 

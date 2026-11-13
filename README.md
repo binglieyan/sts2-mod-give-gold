@@ -70,12 +70,11 @@ A Slay the Spire 2 co-op mod that lets you give gold to teammates. Click the gol
 
 ```bash
 dotnet build   # 编译 DLL，并把 DLL + GiveGold.json 复制到 mods 目录
-dotnet publish # 额外导出 Godot .pck 到 mods 目录
 ```
 
-构建前请在 `GiveGold.csproj` 中配置 `$(Sts2Path)` 和 `$(GodotPath)`。
+构建前请在 `GiveGold.csproj` 中配置 `$(Sts2Path)`。发布包只需要 `GiveGold.dll` + `GiveGold.json` 两个文件（不需要 `.pck`）。
 
-Configure `$(Sts2Path)` and `$(GodotPath)` in `GiveGold.csproj` before building.
+Configure `$(Sts2Path)` in `GiveGold.csproj` before building. A release only needs `GiveGold.dll` + `GiveGold.json` — no `.pck`.
 
 ## 致谢 / Credits
 
