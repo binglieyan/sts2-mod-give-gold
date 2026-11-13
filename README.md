@@ -56,6 +56,7 @@ A Slay the Spire 2 co-op mod that lets you give gold to teammates. Click the gol
 - 战斗中不可赠送
 - 必须有至少一位在线队友
 - 赠送金额不能超过当前持有金币
+- 赠送与收到金币不会触发「获得金币」类遗物效果
 
 ---
 
@@ -63,11 +64,12 @@ A Slay the Spire 2 co-op mod that lets you give gold to teammates. Click the gol
 - Cannot send gold during combat
 - At least one online teammate required
 - Amount cannot exceed your current gold
+- Giving or receiving gold does not trigger "gain gold" relic effects
 
 ## 构建 / Build
 
 ```bash
-dotnet build   # 编译 DLL 并复制到 mods 目录
+dotnet build   # 编译 DLL，并把 DLL + GiveGold.json 复制到 mods 目录
 dotnet publish # 额外导出 Godot .pck 到 mods 目录
 ```
 

@@ -32,8 +32,11 @@ internal static class Sts2ApiCompat
     private const BindingFlags InstanceFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
     private static PropertyInfo? _runLobbyProperty;
+    private static bool _runLobbyResolved;
+
     private static PropertyInfo? _connectedIdsProperty;
     private static Type? _resolvedLobbyType;
+    private static bool _connectedIdsResolved;
 
     /// <summary>Returns the NetIds of the players in the current run lobby, or null if unresolvable.</summary>
     public static IEnumerable<ulong>? GetConnectedPlayerIds(RunManager? runManager)
@@ -45,13 +48,10 @@ internal static class Sts2ApiCompat
         if (lobby == null)
             return null;
 
+        // 解析结果（含“解析不到”）都在 ResolveConnectedIdsProperty 里缓存，这里不再重复打日志。
         PropertyInfo? connectedIdsProperty = ResolveConnectedIdsProperty(lobby.GetType());
         if (connectedIdsProperty == null)
-        {
-            GiveGoldInitializer.Logger.Warn(
-                "GiveGold could not resolve the lobby player-ids API (PlayerIds / ConnectedPlayerIds).");
             return null;
-        }
 
         try
         {
@@ -70,8 +70,15 @@ internal static class Sts2ApiCompat
         // type directly — its namespace moved between game versions.
         // NonPublic included: the publicizer only affects compile time; the real game
         // assembly may keep some members internal.
-        PropertyInfo? property = _runLobbyProperty ??=
-            typeof(RunManager).GetProperty(RunLobbyPropertyName, InstanceFlags);
+        if (!_runLobbyResolved)
+        {
+            _runLobbyProperty = typeof(RunManager).GetProperty(RunLobbyPropertyName, InstanceFlags);
+            _runLobbyResolved = true;
+            if (_runLobbyProperty == null)
+                GiveGoldInitializer.Logger.Warn("GiveGold could not resolve RunManager.RunLobby.");
+        }
+
+        PropertyInfo? property = _runLobbyProperty;
         if (property == null)
             return null;
 
@@ -88,12 +95,21 @@ internal static class Sts2ApiCompat
 
     private static PropertyInfo? ResolveConnectedIdsProperty(Type lobbyType)
     {
-        if (_connectedIdsProperty != null && ReferenceEquals(_resolvedLobbyType, lobbyType))
+        // 解析失败也缓存：否则每次读连接玩家都会重试并重复打 Warn，API 一变就刷屏。
+        if (_connectedIdsResolved && ReferenceEquals(_resolvedLobbyType, lobbyType))
             return _connectedIdsProperty;
 
         _resolvedLobbyType = lobbyType;
+        _connectedIdsResolved = true;
         _connectedIdsProperty = lobbyType.GetProperty(PlayerIdsPropertyName, InstanceFlags)
             ?? lobbyType.GetProperty(ConnectedPlayerIdsPropertyName, InstanceFlags);
+
+        if (_connectedIdsProperty == null)
+        {
+            GiveGoldInitializer.Logger.Warn(
+                $"GiveGold could not resolve the lobby player-ids API (PlayerIds / ConnectedPlayerIds) on {lobbyType.FullName}.");
+        }
+
         return _connectedIdsProperty;
     }
 }

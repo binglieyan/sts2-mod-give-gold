@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace GiveGold.Core;
 
-public static class GiveGoldLoc
+internal static class GiveGoldLoc
 {
     private static readonly Dictionary<string, string> _fallbackZh = new()
     {
@@ -29,6 +29,7 @@ public static class GiveGoldLoc
         ["error:giveFailed"] = "当前无法完成赠送，请检查队友、金额或联机状态。",
         ["error:sendFailed"] = "赠送失败，请查看日志。",
         ["error:amountNotPositive"] = "赠送金额必须大于零。",
+        ["error:amountTooLarge"] = "赠送金额不能超过 {0}。",
         ["error:insufficientGold"] = "金币不足：当前拥有 {0} 金币，无法赠送 {1} 金币。",
         ["error:noGold"] = "你当前没有金币，无法赠送。",
     };
@@ -55,6 +56,7 @@ public static class GiveGoldLoc
         ["error:giveFailed"] = "Cannot complete the transfer. Check teammate, amount, or connection status.",
         ["error:sendFailed"] = "Send failed. Check the logs for details.",
         ["error:amountNotPositive"] = "Amount must be greater than zero.",
+        ["error:amountTooLarge"] = "Amount cannot exceed {0}.",
         ["error:insufficientGold"] = "Not enough gold: you have {0} gold but are trying to send {1}.",
         ["error:noGold"] = "You have no gold to send.",
     };

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace GiveGold.Ui;
 
-public partial class GiveGoldPanel : Control
+internal partial class GiveGoldPanel : Control
 {
     private readonly List<GiveGoldTypes.GiveTarget> _targets = [];
 

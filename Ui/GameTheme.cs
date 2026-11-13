@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Helpers;
 
 namespace GiveGold.Ui;
 
-public static class GameTheme
+internal static class GameTheme
 {
     public static readonly Color Cream = StsColors.cream;
     public static readonly Color Gold = StsColors.gold;

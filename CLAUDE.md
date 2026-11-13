@@ -40,7 +40,8 @@ Integration/
 - **Lifecycle**: `NGame._Ready` → global init; `NRun._Ready` → attach network handler; `RunManager.CleanUp` → detach+cleanup
 - **UI trigger**: Click the gold display in the top bar → toggle the GiveGold panel
 - **Constraints**: Panel only opens when in a multiplayer run, not in combat, with at least one connected teammate
-- **Network**: Gold is directly modified on `Player.Gold` (sync, no async). A reliable broadcast message is sent after local deduction. If sending fails, the deduction is rolled back. Messages are deduplicated by request ID and applied on both sender and receiver sides. Incoming gold plays tiered SFX via `SfxCmd.Play()` based on amount thresholds
+- **Amount validation**: `1 ≤ amount ≤ 1,000,000` is enforced on both the send and receive paths (`GiveGoldExecutor.ValidateAmount`); gold additions clamp at `int.MaxValue` and remote deductions clamp at 0, so a tampered packet can't overflow or negative anyone's gold. Whether the sender can actually afford it is only enforced on the sender's own client (other clients' copies may lag, and rejecting there would desync)
+- **Network**: Gold is directly modified on `Player.Gold` (sync, no async). The sender applies both halves locally (sender −amount, target +amount), then broadcasts a reliable message; if sending fails both halves are rolled back. Messages are deduplicated by request ID, so the sender's own echo is dropped. Every other client (the target *and* any third player) applies the same two-sided change on receipt — only the target additionally plays tiered SFX via `SfxCmd.Play()` — so all clients' gold copies stay converged
 
 ## Beta API Compatibility
 
@@ -50,8 +51,9 @@ Integration/
 
 ## Build Output
 
-- Post-build: DLL auto-copied to `$(Sts2Path)\mods\`
+- Post-build: DLL + `GiveGold.json` (mod manifest) auto-copied to `$(Sts2Path)\mods\`; the game only loads a local mod when its manifest sits next to the DLL
 - Post-publish: Godot `.pck` auto-exported to `$(Sts2Path)\mods\GiveGold.pck`
+- The `.pck` is **not mounted at runtime** (`"has_pck": false`; `ModManager.TryLoadMod` skips the whole PCK branch). Verified 2026-11-13 on v0.107.1 (stable) and v0.113.0 (beta): with no `.pck` present, the DLL still loads and `GiveGoldPanel` instantiates fine. Keep shipping it for forward compatibility, but don't rely on it for assets
 - Requires `$(Sts2Path)` and `$(GodotPath)` configured in `.csproj` or set as env vars
 
 ## Coding Conventions

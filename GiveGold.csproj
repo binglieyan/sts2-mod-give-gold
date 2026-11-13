@@ -5,8 +5,9 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<GodotPath>"D:\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64_console.exe"</GodotPath>
 		<Sts2Path>E:\SteamLibrary\steamapps\common\Slay the Spire 2</Sts2Path>
-		<!-- Disable C# source generators to avoid type conflicts with referenced assemblies -->
-		<EnableSourceGenerators>false</EnableSourceGenerators>
+		<!-- Godot 自动生成的入口类 Main 与被 publicize 的 sts2.dll 里的 Main 同名，CS0436 只影响生成的入口类，与本模组无关。
+		     真正关掉生成器的开关是 DisableImplicitGodotGeneratorReferences，但那会让 Godot 不再为 Control 子类生成脚本绑定，UI 面板可能无法实例化，故保持生成器开启。 -->
+		<NoWarn>$(NoWarn);CS0436</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -42,6 +43,12 @@
 	<Target Name="CopyAssemblyToMods" AfterTargets="PostBuildEvent">
 		<Message Text="Copying .dll to mods folder." Importance="high" />
 		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(Sts2Path)\mods\" />
+	</Target>
+
+	<!-- 游戏只识别带清单的本地 mod，DLL 旁边没有 GiveGold.json 时本地版不会被加载 -->
+	<Target Name="CopyManifestToMods" AfterTargets="PostBuildEvent">
+		<Message Text="Copying GiveGold.json to mods folder." Importance="high" />
+		<Copy SourceFiles="$(MSBuildProjectDirectory)\GiveGold.json" DestinationFolder="$(Sts2Path)\mods\" SkipUnchangedFiles="true" />
 	</Target>
 
 	<Target Name="GodotPublish" AfterTargets="Publish">
